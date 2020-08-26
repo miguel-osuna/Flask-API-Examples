@@ -2,6 +2,10 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+# Flask configuration
+FLASK_ENV = "development"
+FLASK_DEBUG = True
+
 # Database configuration
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = True
@@ -17,5 +21,3 @@ PAGINATION_PAGE_SIZE = 4
 PAGINATION_PAGE_ARGUMENT_NAME = "page"
 
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, "db_repository")
-
-FLASK_ENV = "development"

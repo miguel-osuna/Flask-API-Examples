@@ -102,7 +102,7 @@ class NotificationSchema(ma.Schema):
     url = ma.URLFor("service.notificationresource", id="<id>", _external=True)
 
     @pre_load
-    def process_notification_category(self, data):
+    def process_notification_category(self, data, **kwargs):
         notification_category = data.get("notification_category")
         if notification_category:
             if isinstance(notification_category, dict):

@@ -21,7 +21,7 @@ service = Api(service_blueprint)
 class NotificationResource(Resource):
     def get(self, id):
         notification = Notification.query.get_or_404(id)
-        dumped_notification = notification_schema.dump(notification).data
+        dumped_notification = notification_schema.dump(notification)
         return dumped_notification
 
     def patch(self, id):
@@ -90,18 +90,13 @@ class NotificationListResource(Resource):
 
     def post(self):
         notification_category_dict = request.get_json()
-
         if not notification_category_dict:
             response = {"message": "No input data provided"}
             return response, HttpStatus.bad_request_400.value
-
         errors = notification_schema.validate(notification_category_dict)
-
         if errors:
             return errors, HttpStatus.bad_request_400.value
-
         notification_message = notification_category_dict["message"]
-
         if not Notification.is_message_unique(id=0, message=notification_message):
             response = {
                 "error": "A notification with the message {} already exists".format(
@@ -109,7 +104,6 @@ class NotificationListResource(Resource):
                 )
             }
             return response, HttpStatus.bad_request_400.value
-
         try:
             notification_category_name = notification_category_dict[
                 "notification_category"
@@ -132,9 +126,8 @@ class NotificationListResource(Resource):
             )
             notification.add(notification)
             query = Notification.query.get(notification.id)
-            dump_result = notification_schema.dump(query).data
+            dump_result = notification_schema.dump(query)
             return dump_result, HttpStatus.created_201.value
-
         except SQLAlchemyError as e:
             orm.session.rollback()
             response = {"error": str(e)}
@@ -144,7 +137,7 @@ class NotificationListResource(Resource):
 class NotificationCategoryResource(Resource):
     def get(self, id):
         notification_category = NotificationCategory.query.get_or_404(id)
-        dump_result = notification_category_schema.dump(notification_category).data
+        dump_result = notification_category_schema.dump(notification_category)
         return dump_result
 
     def patch(self, id):
@@ -170,7 +163,7 @@ class NotificationCategoryResource(Resource):
                     id=id, name=notification_category_name
                 ):
                     notification_category.name = notification_category_name
-                    
+
                 else:
                     response = {
                         "error": "A category with the name {} already exists".format(
@@ -204,7 +197,7 @@ class NotificationCategoryListResource(Resource):
         notification_categories = NotificationCategory.query.all()
         dump_results = notification_category_schema.dump(
             notification_categories, many=True
-        ).data
+        )
         return dump_results
 
     def post(self):
@@ -237,7 +230,7 @@ class NotificationCategoryListResource(Resource):
             notification_category = NotificationCategory(notification_category_name)
             notification_category.add(notification_category)
             query = NotificationCategory.query.get(notification_category.id)
-            dump_result = notification_category_schema.dump(query).data
+            dump_result = notification_category_schema.dump(query)
             return dump_result, HttpStatus.created_201.value
 
         except SQLAlchemyError as e:
