@@ -3,13 +3,12 @@ from marshmallow import validate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
-orm = SQLAlchmey()
+
+orm = SQLAlchemy()
 ma = Marshmallow()
 
 
 class ResourceAddUpdateDelete:
-    """ ORM Database Resource Handler. """
-
     def add(self, resource):
         orm.session.add(resource)
         return orm.session.commit()
@@ -23,13 +22,16 @@ class ResourceAddUpdateDelete:
 
 
 class Notification(orm.Model, ResourceAddUpdateDelete):
-    """ Notification database model. """
-
     id = orm.Column(orm.Integer, primary_key=True)
     message = orm.Column(orm.String(250), unique=True, nullable=False)
     ttl = orm.Column(orm.Integer, nullable=False)
     creation_date = orm.Column(
         orm.TIMESTAMP, server_default=orm.func.current_timestamp(), nullable=False
+    )
+    notification_category_id = orm.Column(
+        orm.Integer,
+        orm.ForeignKey("notification_category.id", ondelete="CASCADE"),
+        nullable=False,
     )
     notification_category = orm.relationship(
         "NotificationCategory",
@@ -40,6 +42,17 @@ class Notification(orm.Model, ResourceAddUpdateDelete):
     displayed_times = orm.Column(orm.Integer, nullable=False, server_default="0")
     displayed_once = orm.Column(orm.Boolean, nullable=False, server_default="false")
 
+    @classmethod
+    def is_message_unique(cls, id, message):
+        existing_notification = cls.query.filter_by(message=message).first()
+        if existing_notification is None:
+            return True
+        else:
+            if existing_notification.id == id:
+                return True
+            else:
+                return False
+
     def __init__(self, message, ttl, notification_category):
         self.message = message
         self.ttl = ttl
@@ -49,6 +62,17 @@ class Notification(orm.Model, ResourceAddUpdateDelete):
 class NotificationCategory(orm.Model, ResourceAddUpdateDelete):
     id = orm.Column(orm.Integer, primary_key=True)
     name = orm.Column(orm.String(150), unique=True, nullable=False)
+
+    @classmethod
+    def is_name_unique(cls, id, name):
+        existing_notification_category = cls.query.filter_by(name=name).first()
+        if existing_notification_category is None:
+            return True
+        else:
+            if existing_notification_category.id == id:
+                return True
+            else:
+                return False
 
     def __init__(self, name):
         self.name = name
@@ -88,6 +112,5 @@ class NotificationSchema(ma.Schema):
             notification_category_dict = dict(name=notification_category_name)
         else:
             notification_category_dict = {}
-
         data["notification_category"] = notification_category_dict
         return data
