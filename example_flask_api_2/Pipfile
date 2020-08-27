@@ -12,6 +12,11 @@ flask-marshmallow = "*"
 psycopg2 = "*"
 flask-restful = "*"
 httpie = "*"
+flask-httpauth = "*"
+passlib = "*"
+pytest = "*"
+coverage = "*"
+pytest-cov = "*"
 
 [dev-packages]
 
