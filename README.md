@@ -1,2 +1,2 @@
 # Flask-API-Examples
-APIs built with Flask-RESTful and Django REST
+APIs built with Flask-RESTful
